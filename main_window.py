@@ -38,6 +38,7 @@ class ChatWindow(QMainWindow):
         self.conn_label = QLabel("🔴 Disconnected")
 
         self.chat_display = QPlainTextEdit()
+        self.chat_display.setReadOnly(True)
         self.chat_input = QLineEdit()
         send_button = QPushButton("Send")
 
@@ -87,7 +88,11 @@ class ChatWindow(QMainWindow):
     def on_message_received(self, message):
         message = json.loads(message)
         self.connected_list = list(message)[1]
-        self.user_label.setText(str(list(message)[1]))
+        user_string = ""
+        for user in list(message)[1]:
+            user_string += "\n " + user
+
+        self.user_label.setText(user_string)
         self.chat_display.appendPlainText(f"Server: {message}")
 
     def on_error(self, error):
