@@ -6,7 +6,7 @@ connected_clients = set()
 connected_clients_info = []
 
 async def BroadcastAll(message, websocket):
-    message = MessagePacket(message, connected_clients_info).createPacket()
+    message = MessagePacket("tu" , message, connected_clients_info).createPacket()
     for client in connected_clients:
                 if client != websocket:
                     await client.send(message)
@@ -17,11 +17,11 @@ async def handler(websocket, path):
     connected_clients_info.append(str(websocket.remote_address[1]))
     try:
         print("New Client: " + str(websocket.remote_address[1]))
-        await BroadcastAll(str(websocket.remote_address[1]) + " Connected", websocket)
+        await BroadcastAll("tu", str(websocket.remote_address[1]) + " Connected", websocket)
         async for message in websocket:
             print(f"Received: {message}")  # Print received message to console
             # Broadcast message to all connected clients
-            await BroadcastAll(message, websocket)
+            await BroadcastAll("tu", message, websocket)
 
     except websockets.exceptions.ConnectionClosed:
         pass

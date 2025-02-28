@@ -76,7 +76,6 @@ class ChatWindow(QMainWindow):
         self.websocket.close()
 
     def on_connected(self):
-
         self.chat_display.appendPlainText("Connected to server")
         self.conn_label.setText("🟢 Connected")
 
@@ -86,23 +85,24 @@ class ChatWindow(QMainWindow):
         self.websocket = None
 
     def on_message_received(self, message):
-        message = json.loads(message)
-        self.connected_list = list(message)[1]
+        tempMessage = MessagePacket("tu")
+        tempMessage.decodePacket(message)
+        self.connected_list = tempMessage.userlist
         user_string = ""
         for user in list(message)[1]:
             user_string += "\n " + user
 
         self.user_label.setText(user_string)
-        self.chat_display.appendPlainText(f"Server: {message}")
+        self.chat_display.appendPlainText(f"Server: {tempMessage.text}")
 
     def on_error(self, error):
         self.chat_display.appendPlainText(f"Error: {error}")
 
     def send_message(self):
         if self.websocket and self.websocket.state() == QAbstractSocket.SocketState.ConnectedState:
-            message = MessagePacket(self.chat_input.text(), self.connected_list)
+            message = MessagePacket("t", self.chat_input.text())
             self.websocket.sendTextMessage(message.createPacket())
-            self.chat_display.appendPlainText(f"You: {message.createPacket()}")
+            self.chat_display.appendPlainText(f"You: {self.chat_input.text()}")
             self.chat_input.clear()
         else:
             self.chat_display.appendPlainText("Not connected to server")
