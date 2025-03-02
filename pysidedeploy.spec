@@ -17,7 +17,7 @@ exec_directory = .
 project_file = 
 
 # application icon
-icon = C:\Users\music\Source\Repos\qt\chat\Assets\avalanche_avax_crypto_icon_264373.ico
+icon = C:\Users\music\Source\Repos\qt\chat\.venv\Lib\site-packages\PySide6\scripts\deploy_lib\pyside_icon.ico
 
 [python]
 
@@ -40,11 +40,11 @@ qml_files =
 excluded_qml_plugins = 
 
 # qt modules used. comma separated
-modules = Gui,Widgets,Core,WebSockets,Network
+modules = Core,Gui,WebSockets,Widgets,Network
 
 # qt plugins used by the application. only relevant for desktop deployment. for qt plugins used
 # in android application see [android][plugins]
-plugins = styles
+plugins = xcbglintegrations,platforms/darwin,networkinformation,networkaccess,egldeviceintegrations,imageformats,platforminputcontexts,tls,styles,accessiblebridge,platformthemes,iconengines,platforms,generic
 
 [android]
 
@@ -75,7 +75,7 @@ extra_args = --quiet --noinclude-qt-translations --windows-console-mode=disable
 # build mode
 # possible options = [release, debug]
 # release creates an aab, while debug creates an apk
-mode = release
+mode = debug
 
 # contrains path to pyside6 and shiboken6 recipe dir
 recipe_dir = 
@@ -95,5 +95,5 @@ local_libs =
 
 # architecture of deployed platform
 # possible values = ["aarch64", "armv7a", "i686", "x86_64"]
-arch = x86_64
+arch = 
 
