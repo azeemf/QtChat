@@ -14,6 +14,10 @@ class ChatWindow(QMainWindow):
         self.client.disconnected.connect(self.on_disconnect)
         self.client.message_received.connect(self.incoming_text_message)
         self.client.client_list_updated.connect(self.on_user_list_updated)
+        self.client.typing_started.connect(self.add_typer)
+        self.client.typing_stopped.connect(self.remove_typer)
+        self.typing_users = {}
+        self.typing_user_index = 0
 
         cca = self.central_chat_area()
         self.setCentralWidget(cca)
@@ -63,6 +67,10 @@ class ChatWindow(QMainWindow):
     def on_user_list_updated(self, clients):
         self.update_user_list(clients)
 
+    def textedit(self):
+        self.client.send_typing_start()
+        self.client.send_typing_stop()
+
     def central_chat_area(self):
         central_widget = QWidget()
         layout = QVBoxLayout()
@@ -73,6 +81,7 @@ class ChatWindow(QMainWindow):
         self.chat_display.setReadOnly(True)
         self.typing_display = QHBoxLayout()
         self.chat_input = QLineEdit()
+        self.chat_input.textEdited.connect(self.textedit)
         send_button = QPushButton("Send")
 
         conn_buttons = QHBoxLayout()
@@ -90,6 +99,7 @@ class ChatWindow(QMainWindow):
 
         layout.addWidget(self.conn_label)
         layout.addWidget(self.chat_display)
+        layout.addWidget()
         layout.addWidget(self.chat_input)
         layout.addWidget(send_button)
         layout.addWidget(conn_but_layout)
@@ -116,4 +126,17 @@ class ChatWindow(QMainWindow):
     def send_message(self):
         self.chat_display.appendPlainText(f"{self.client.get_client_color()} (You): {self.chat_input.text()}")
         self.client.send_chat_message(self.chat_input.text())
+    
+    def add_typer(self, uc):
+        if uc not in self.typing_users:
+            self.typing_users[uc] = self.typing_user_index
+            self.typing_user_index += 1
+            self.typing_display.insertWidget(self.typing_user_index, QLabel(f"{uc} is typing "))
+
+    def remove_typer(self, uc):
+        if uc in self.typing_users:
+            self.typing_display.removeWidget(self.typing_users[uc])
+            self.typing_users.pop(uc)
+            self.typing_user_index -= 1
+            
 
