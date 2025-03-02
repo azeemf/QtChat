@@ -10,6 +10,7 @@ class ChatWindow(QMainWindow):
         self.client = WebSocketClient("wss://chat.aaf-services.uk")
         self.client.connected.connect(self.on_connected)
         self.client.disconnected.connect(self.on_disconnect)
+        self.client.message_received.connect(self.incoming_text_message)
 
         cca = self.central_chat_area()
         self.setCentralWidget(cca)
@@ -36,7 +37,7 @@ class ChatWindow(QMainWindow):
         conn_but_layout = QWidget(self)
         conn_but_layout.setLayout(conn_buttons)
 
-        # send_button.clicked.connect(self.send_message)
+        send_button.clicked.connect(self.send_message)
         connect_button.clicked.connect(self.connect_to_server)
         disconnect_button.clicked.connect(self.disconnect)
         
@@ -62,3 +63,10 @@ class ChatWindow(QMainWindow):
     def on_disconnect(self):
         self.chat_display.appendPlainText("Disconnected from server")
         self.conn_label.setText("🔴 Disconnected")
+    
+    def incoming_text_message(self, text, sendercolor):
+        self.chat_display.appendPlainText(f"{sendercolor}: {text}")
+    
+    def send_message(self):
+        self.chat_display.appendPlainText(f"{self.client.get_client_color()} (You): {self.chat_input.text()}")
+        self.client.send_chat_message(self.chat_input.text())
