@@ -42,7 +42,6 @@ async def send_direct_message(sender, recipient_color, message_text):
         error_message = {"type": "error", "message": f"Recipient with color {recipient_color} not found or offline."}
         await sender.send(json.dumps(error_message))
 
-
 async def handle_client(websocket, path):
     """Handles each client connection."""
     client_color = generate_unique_color()
@@ -113,7 +112,6 @@ async def handle_client(websocket, path):
         if websocket in typing_clients: # Ensure client is still in typing_clients
             typing_clients.remove(websocket)
         await broadcast_client_list() # Update client list for everyone on disconnect
-
 
 async def main():
     """Starts the WebSocket server."""
