@@ -25,7 +25,7 @@ class ChatWindow(QMainWindow):
         dock_widget = QDockWidget("Chats")
         dock_widget.setAllowedAreas(Qt.DockWidgetArea.LeftDockWidgetArea)
         dock_widget.setFeatures(QDockWidget.DockWidgetFeature.NoDockWidgetFeatures)
-        dock_widget.setFixedWidth(200)
+        dock_widget.setFixedWidth(50)
         self.user_label = QLabel(" ")
         dock_widget.setWidget(self.user_label)
         return dock_widget
