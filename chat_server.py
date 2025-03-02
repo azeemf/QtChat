@@ -16,7 +16,13 @@ async def broadcast_client_list():
     """Broadcasts the updated client list to all connected clients."""
     message = await get_client_list_message()
     if connected_clients: # Avoid error if no clients are connected during server start/shutdown
-        await asyncio.wait([client.send(json.dumps(message)) for client in connected_clients if client.open])
+        # Create tasks for each send operation
+        send_tasks = [
+            asyncio.create_task(client.send(json.dumps(message)))
+            for client in connected_clients if client.open
+        ]
+        if send_tasks: # Only await if there are tasks to wait for
+            await asyncio.wait(send_tasks)
 
 def generate_unique_color():
     """Generates a random hex color code."""
@@ -42,6 +48,7 @@ async def send_direct_message(sender, recipient_color, message_text):
         error_message = {"type": "error", "message": f"Recipient with color {recipient_color} not found or offline."}
         await sender.send(json.dumps(error_message))
 
+
 async def handle_client(websocket, path):
     """Handles each client connection."""
     client_color = generate_unique_color()
@@ -65,11 +72,15 @@ async def handle_client(websocket, path):
                     "sender_color": client_color,
                     "message": data["message"]
                 }
-                await asyncio.wait([
-                    client.send(json.dumps(broadcast_message))
+                # Create tasks for each send operation
+                send_tasks = [
+                    asyncio.create_task(client.send(json.dumps(broadcast_message)))
                     for client in connected_clients
-                    if client != websocket and client.open # Don't send back to sender, and ensure connection is open
-                ])
+                    if client != websocket and client.open
+                ]
+                if send_tasks: # Only await if there are tasks to wait for
+                    await asyncio.wait(send_tasks)
+
             elif message_type == "direct_message":
                 await send_direct_message(websocket, data["recipient_color"], data["message"])
             elif message_type == "typing_start":
@@ -78,23 +89,30 @@ async def handle_client(websocket, path):
                     "type": "typing_start",
                     "sender_color": client_color
                 }
-                await asyncio.wait([
-                    client.send(json.dumps(typing_indicator))
+                # Create tasks for each send operation
+                send_tasks = [
+                    asyncio.create_task(client.send(json.dumps(typing_indicator)))
                     for client in connected_clients
                     if client != websocket and client.open
-                ])
+                ]
+                if send_tasks: # Only await if there are tasks to wait for
+                    await asyncio.wait(send_tasks)
+
             elif message_type == "typing_stop":
-                if websocket in typing_clients: # Ensure client is actually in typing_clients before removing
+                if websocket in typing_clients:
                     typing_clients.remove(websocket)
                     typing_indicator = {
                         "type": "typing_stop",
                         "sender_color": client_color
                     }
-                    await asyncio.wait([
-                        client.send(json.dumps(typing_indicator))
+                    # Create tasks for each send operation
+                    send_tasks = [
+                        asyncio.create_task(client.send(json.dumps(typing_indicator)))
                         for client in connected_clients
                         if client != websocket and client.open
-                    ])
+                    ]
+                    if send_tasks: # Only await if there are tasks to wait for
+                        await asyncio.wait(send_tasks)
             else:
                 print(f"Unknown message type: {message_type}")
 
@@ -112,6 +130,7 @@ async def handle_client(websocket, path):
         if websocket in typing_clients: # Ensure client is still in typing_clients
             typing_clients.remove(websocket)
         await broadcast_client_list() # Update client list for everyone on disconnect
+
 
 async def main():
     """Starts the WebSocket server."""
