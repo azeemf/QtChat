@@ -40,7 +40,7 @@ qml_files =
 excluded_qml_plugins = 
 
 # qt modules used. comma separated
-modules = Network,WebSockets,Gui,Core,Widgets
+modules = Widgets,Network,WebSockets,Core,Gui
 
 # qt plugins used by the application. only relevant for desktop deployment. for qt plugins used
 # in android application see [android][plugins]
