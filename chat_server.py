@@ -2,6 +2,7 @@ import asyncio
 import websockets
 import json
 import secrets  # For generating random colors and potentially client IDs in the future
+import random
 
 connected_clients = set()
 client_colors = {}
@@ -25,8 +26,8 @@ async def broadcast_client_list():
             await asyncio.wait(send_tasks)
 
 def generate_unique_color():
-    """Generates a random hex color code."""
-    return f"#{secrets.token_hex(3)}" # Generates a 6-digit hex color
+    """Generates a random pastel hex color code."""
+    return f"#{random.randint(128, 255):02x}{random.randint(128, 255):02x}{random.randint(128, 255):02x}"
 
 async def send_direct_message(sender, recipient_color, message_text):
     """Sends a direct message to a specific client."""
