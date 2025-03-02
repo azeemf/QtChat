@@ -1,0 +1,1 @@
+# Simple Chat Application Built in Qt and PySide6
