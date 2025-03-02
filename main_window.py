@@ -49,16 +49,19 @@ class ChatWindow(QMainWindow):
         conn_buttons.addWidget(disconnect_button)
         conn_but_layout = QWidget(self)
         conn_but_layout.setLayout(conn_buttons)
+        self.raw_debug = QLabel("raw_debug")
 
         send_button.clicked.connect(self.send_message)
         connect_button.clicked.connect(self.connect_to_server)
         disconnect_button.clicked.connect(self.disconnect)
+        
 
         master_layout.addWidget(self.conn_label)
         master_layout.addWidget(self.chat_display)
         master_layout.addWidget(self.chat_input)
         master_layout.addWidget(send_button)
         master_layout.addWidget(conn_but_layout)
+        master_layout.addWidget(self.raw_debug)
 
         return central_widget
 
@@ -85,15 +88,19 @@ class ChatWindow(QMainWindow):
         self.websocket = None
 
     def on_message_received(self, message):
-        tempMessage = MessagePacket("tu")
+        self.raw_debug.setText(message)
+        tempMessage = MessagePacket("n")
         tempMessage.decodePacket(message)
-        self.connected_list = tempMessage.userlist
-        user_string = ""
-        for user in list(message)[1]:
-            user_string += "\n " + user
+        self.raw_debug.setText(tempMessage.userlist)
+        if 'u' in tempMessage.typecode:
+            self.connected_list = tempMessage.userlist
+            user_string = ""
+            for user in list(message)[1]:
+                user_string += "\n " + user
+            self.user_label.setText(user_string)
 
-        self.user_label.setText(user_string)
-        self.chat_display.appendPlainText(f"Server: {tempMessage.text}")
+        if 't' in tempMessage.typecode:
+            self.chat_display.appendPlainText(f"Server: {tempMessage.text}")
 
     def on_error(self, error):
         self.chat_display.appendPlainText(f"Error: {error}")
