@@ -1,8 +1,10 @@
-from PySide6.QtWidgets import QMainWindow, QVBoxLayout, QPlainTextEdit, QLineEdit, QPushButton, QWidget, QApplication, QHBoxLayout, QLabel, QDockWidget
+from PySide6.QtWidgets import QMainWindow, QVBoxLayout, QPlainTextEdit, QLineEdit, QPushButton, QWidget, QApplication, QHBoxLayout, QLabel, QDockWidget, QListView
 from PySide6.QtWebSockets import QWebSocket
 from PySide6.QtNetwork import QAbstractSocket
 from PySide6.QtCore import QUrl, Qt
 from main_client_service import WebSocketClient
+from PySide6.QtGui import QStandardItemModel, QStandardItem, QColor
+
 
 class ChatWindow(QMainWindow):
     def __init__(self):
@@ -11,13 +13,48 @@ class ChatWindow(QMainWindow):
         self.client.connected.connect(self.on_connected)
         self.client.disconnected.connect(self.on_disconnect)
         self.client.message_received.connect(self.incoming_text_message)
+        self.client.client_list_updated.connect(self.on_user_list_updated)
 
         cca = self.central_chat_area()
         self.setCentralWidget(cca)
 
+        self.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, self.user_list_dock())
+
         self.setWindowTitle("AAF Chat")
         self.setFixedSize(500, 350)
     
+    def user_list_dock(self):
+        uld = QDockWidget("Connected Users")
+        uld.setAllowedAreas(Qt.DockWidgetArea.LeftDockWidgetArea)
+        uld.setFeatures(QDockWidget.DockWidgetFeature.NoDockWidgetFeatures)
+        uld.setFixedWidth(100)
+        uld.setWidget(self.user_list_handler())
+        return uld
+    
+    def user_list_handler(self):
+        self.user_list_view = QListView()
+        self.user_list_model = QStandardItemModel() # Create the model
+        self.user_list_view.setModel(self.user_list_model) # Set the model for the view
+
+    def update_user_list(self, clients):
+        """
+        Updates the QListView with the new list of connected clients using a QStandardItemModel.
+
+        Args:
+            clients (list): A list of client dictionaries, e.g., [{'color': '#RRGGBB'}, ...].
+        """
+        self.user_list_model.clear() # Clear the model
+
+        for client_data in clients:
+            color = client_data.get('color')
+            if color:
+                item = QStandardItem(f"User: {color}") # Create a model item
+                item.setForeground(QColor(color)) # Style the item
+                self.user_list_model.appendRow(item) # Add item to the model
+    
+    def on_user_list_updated(self, clients):
+        self.update_user_list(clients)
+
     def central_chat_area(self):
         central_widget = QWidget()
         layout = QVBoxLayout()
