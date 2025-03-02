@@ -27,14 +27,22 @@ class ChatWindow(QMainWindow):
         uld = QDockWidget("Connected Users")
         uld.setAllowedAreas(Qt.DockWidgetArea.LeftDockWidgetArea)
         uld.setFeatures(QDockWidget.DockWidgetFeature.NoDockWidgetFeatures)
-        uld.setFixedWidth(100)
+        uld.setFixedWidth(150)
         uld.setWidget(self.user_list_handler())
         return uld
     
     def user_list_handler(self):
+        user_list_container = QWidget() # Create a container widget
+        layout = QVBoxLayout() # Use a layout (e.g., QVBoxLayout)
+        user_list_container.setLayout(layout)
+
         self.user_list_view = QListView()
         self.user_list_model = QStandardItemModel() # Create the model
         self.user_list_view.setModel(self.user_list_model) # Set the model for the view
+
+        layout.addWidget(self.user_list_view) # Add the QListView to the layout
+
+        return user_list_container # Return the container widget
 
     def update_user_list(self, clients):
         """
@@ -63,6 +71,7 @@ class ChatWindow(QMainWindow):
         self.conn_label = QLabel("🔴 Disconnected")
         self.chat_display = QPlainTextEdit()
         self.chat_display.setReadOnly(True)
+        self.typing_display = QHBoxLayout()
         self.chat_input = QLineEdit()
         send_button = QPushButton("Send")
 
@@ -107,3 +116,4 @@ class ChatWindow(QMainWindow):
     def send_message(self):
         self.chat_display.appendPlainText(f"{self.client.get_client_color()} (You): {self.chat_input.text()}")
         self.client.send_chat_message(self.chat_input.text())
+
